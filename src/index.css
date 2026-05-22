@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .bg-copa-blue-600 { background-color: #2b82c9; }
+  .bg-copa-blue-700 { background-color: #2368af; }
+  .text-copa-blue-700 { color: #2368af; }
+  .text-copa-blue-800 { color: #1e518d; }
+  .ring-copa-blue-500 { --tw-ring-color: #3b9ddb; }
+  .focus-visible\:outline-copa-blue-600:focus-visible { outline-color: #2b82c9; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
