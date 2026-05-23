@@ -26,8 +26,8 @@ const Hero = () => {
                         <div
                             className='relative rounded-full px-3 py-1 text-sm leading-6 ring-1 ring-white/10 hover:ring-white/20 text-white'
                         >
-                            Featured in <span className='italic'>InMaricopa</span>: Discover our story
-                            in the local spotlight! <a
+                            Featured in the local press: Discover our story
+                            in the community spotlight! <a
                                 href='https://www.inmaricopa.com/the-dream-team-father-daughter-duo-debut-citys-first-mattress-store/'
                                 className='font-semibold text-white'
                             ><span className='absolute inset-0' aria-hidden='true'></span>Read more <span aria-hidden="true">&rarr;</span></a>
@@ -35,10 +35,10 @@ const Hero = () => {
                     </div>
                     <div className='text-center'>
                         <h1 className='text-4xl font-bold tracking-tight text-white sm:text-6xl'>
-                            Your Local Mattress Destination in Maricopa
+                            Mattress2Go: Sleep Better Starts Here
                         </h1>
                         <p className='mt-6 text-xl leading-8 text-gray-300'>
-                            No more long drives—find the perfect mattress right here in Maricopa at Copa Mattress and Furniture, where comfort meets convenience!
+                            Discover quality mattresses, expert guidance, and fast delivery in one easy shopping experience.
                         </p>
                         <div className='mt-10 flex items-center justify-center gap-x-6'>
                             <Link

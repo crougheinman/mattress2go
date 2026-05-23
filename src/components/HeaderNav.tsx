@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { SITE_NAME, HEADER_NAV_LINKS, HEADER_CTA_BUTTON, STORE_INFO } from '../constants';
-import logo from '../assets/copa-logo.jpg';
+import logo from '../assets/mattress2go-logo.png';
 import { useState } from 'react';
 
 const HeaderNav = () => {
@@ -18,7 +18,7 @@ const HeaderNav = () => {
                         <img
                             className='h-12 w-auto'
                             src={logo}
-                            alt='Copa Mattress and Furniture Logo'
+                            alt='Mattress2Go Outlet Logo'
                         />
                     </Link>
                 </div>
@@ -36,7 +36,7 @@ const HeaderNav = () => {
                 <div className='flex flex-1 items-center justify-end gap-x-6'>
                     <Link
                         to={HEADER_CTA_BUTTON.url}
-                        className='rounded-md bg-copa-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-copa-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copa-blue-700'
+                        className='rounded-md bg-copa-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-copa-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copa-blue-800'
                     >
                         {HEADER_CTA_BUTTON.name}
                     </Link>

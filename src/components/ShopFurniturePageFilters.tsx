@@ -13,6 +13,8 @@ import { SITE_NAME } from "../constants"
 import type { FurnitureItem } from "../constants/furniture"
 import { furnitureFilters } from "../constants/furniture"
 
+const PLACEHOLDER_SRC = '/shop-placeholder.png'
+
 const filters = furnitureFilters;
 
 const getPropertyValue = (obj: any, path: string) => {
@@ -273,13 +275,17 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
                                             className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
                                         >
                                             <div className="aspect-h-3 aspect-w-4 bg-gray-200 sm:aspect-none group-hover:opacity-75 sm:h-96">
-                                                {product.images && product.images.length > 0 && (
-                                                    <img
-                                                        src={product.images[0]}
-                                                        alt={product.name}
-                                                        className="h-full w-full object-cover object-center sm:h-full sm:w-full"
-                                                    />
-                                                )}
+                                                <img
+                                                    src={product.images?.[0] || PLACEHOLDER_SRC}
+                                                    alt={product.name}
+                                                    className="h-full w-full object-cover object-center sm:h-full sm:w-full"
+                                                    onError={(e) => {
+                                                        const img = e.currentTarget as HTMLImageElement
+                                                        if (!img.src.includes(PLACEHOLDER_SRC)) {
+                                                            img.src = PLACEHOLDER_SRC
+                                                        }
+                                                    }}
+                                                />
                                             </div>
                                             <div className="flex flex-1 flex-col space-y-2 p-4">
                                                 <h3 className="text-sm font-medium text-gray-900">

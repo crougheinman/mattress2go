@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FOOTER_LINKS, SOCIALS, SITE_NAME } from '../constants';
 import type { FooterLink, FooterSection } from '../types';
-import logo from '../assets/copa-logo.jpg';
+import logo from '../assets/mattress2go-logo.png';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
@@ -48,14 +48,14 @@ const Footer = () => {
         );
     };
     return (
-        <footer className="bg-white" aria-labelledby="footer-heading">
+        <footer className="bg-olive-300" aria-labelledby="footer-heading">
             <h2 id="footer-heading" className="sr-only">Footer</h2>
             <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
                 <div className="xl:grid xl:grid-cols-3 xl:gap-8">
                     <div className="space-y-8">
-                        <img className="h-16" src={logo} alt={SITE_NAME} />
+                        <img className="h-12 w-auto" src={logo} alt={SITE_NAME} />
                         <p className="text-sm leading-6 text-gray-600">
-                            Your Local Mattress Destination in Maricopa
+                            Mattress2Go: Sleep Better Starts Here
                         </p>
                         <div className="flex space-x-6">
                             {SOCIALS.map((social) => (

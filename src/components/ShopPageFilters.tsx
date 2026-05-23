@@ -13,6 +13,9 @@ import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid'
 import { generateFiltersFromProducts, SITE_NAME } from "../constants.ts"
 import type { Product } from "../types.ts"
 import { Link } from 'react-router-dom'
+
+const PLACEHOLDER_SRC = '/shop-placeholder.png'
+
 type FilterOption = {
    value: string;
    label: string;
@@ -220,22 +223,33 @@ export default function MattressShopFilters({ products: initialProducts }: { pro
                      <div className="hidden lg:block">
                         <form className="space-y-10 divide-y divide-gray-200">
                            {filters.map((section, sectionIdx) => (
-                              <div key={section.name} className={sectionIdx === 0 ? 'pb-10' : 'py-10'}>
-                                 <fieldset>
-                                    <legend className="block text-sm font-medium text-gray-900">{section.name}</legend>
-                                    <div className="space-y-3 pt-6">
-                                       {section.options.map((option, optionIdx) => (
-                                          <FilterCheckbox
-                                             // @ts-ignore
-                                             key={option.value}
-                                             section={section}
-                                             option={option}
-                                             optionIdx={optionIdx}
+                              <Disclosure key={section.name} as="div" className={sectionIdx === 0 ? 'pb-10' : 'py-10'} defaultOpen>
+                                 {({ open }) => (
+                                    <>
+                                       <Disclosure.Button className="flex w-full items-center justify-between text-left text-sm font-medium text-gray-900">
+                                          <span>{section.name}</span>
+                                          <ChevronDownIcon
+                                             className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'}`}
                                           />
-                                       ))}
-                                    </div>
-                                 </fieldset>
-                              </div>
+                                       </Disclosure.Button>
+                                       <Disclosure.Panel className="pt-6">
+                                          <fieldset>
+                                             <div className="space-y-3">
+                                                {section.options.map((option, optionIdx) => (
+                                                   <FilterCheckbox
+                                                      // @ts-ignore
+                                                      key={option.value}
+                                                      section={section}
+                                                      option={option}
+                                                      optionIdx={optionIdx}
+                                                   />
+                                                ))}
+                                             </div>
+                                          </fieldset>
+                                       </Disclosure.Panel>
+                                    </>
+                                 )}
+                              </Disclosure>
                            ))}
                         </form>
                      </div>
@@ -261,9 +275,15 @@ export default function MattressShopFilters({ products: initialProducts }: { pro
                               >
                                  <div className="aspect-h-3 aspect-w-4 bg-gray-200 sm:aspect-none group-hover:opacity-75 sm:h-96">
                                     <img
-                                       src={product.thumbnail_path}
+                                       src={product.thumbnail_path || PLACEHOLDER_SRC}
                                        alt={product.name}
                                        className="h-full w-full object-cover object-center sm:h-full sm:w-full"
+                                       onError={(e) => {
+                                          const img = e.currentTarget as HTMLImageElement
+                                          if (!img.src.includes(PLACEHOLDER_SRC)) {
+                                             img.src = PLACEHOLDER_SRC
+                                          }
+                                       }}
                                     />
                                  </div>
                                  <div className="flex flex-1 flex-col space-y-2 p-4">
