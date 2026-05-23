@@ -16,7 +16,7 @@ const HeaderNav = () => {
                     <Link to='/' className='-m-1.5 p-1.5'>
                         <span className='sr-only'>{SITE_NAME}</span>
                         <img
-                            className='h-12 w-auto'
+                            className='h-8 w-auto'
                             src={logo}
                             alt='Mattress2Go Outlet Logo'
                         />
@@ -36,11 +36,11 @@ const HeaderNav = () => {
                 <div className='flex flex-1 items-center justify-end gap-x-6'>
                     <Link
                         to={HEADER_CTA_BUTTON.url}
-                        className='rounded-md bg-copa-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-copa-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copa-blue-800'
+                        className='hidden lg:inline-flex rounded-md bg-copa-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-copa-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copa-blue-800'
                     >
                         {HEADER_CTA_BUTTON.name}
                     </Link>
-                    <a className='hover:text-gray-900' href={`tel:${STORE_INFO.phone}`}>
+                    <a className='hidden lg:flex hover:text-gray-900' href={`tel:${STORE_INFO.phone}`}>
                         <div className='flex gap-x-2'>
                             <dt className='flex-none'>
                                 <span className='sr-only'>Telephone</span>

@@ -2,6 +2,7 @@ import React from 'react';
 import HeaderNav from './components/HeaderNav';
 import Footer from './components/Footer';
 import { SITE_NAME, DESCRIPTION } from './constants';
+import CallButton from './components/CallButton';
 
 interface LayoutProps {
     title: string;
@@ -23,6 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ title, children }) => {
             <main className="grow">
                 {children}
             </main>
+            <CallButton />
             <Footer />
         </div>
     );
