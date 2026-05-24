@@ -8,12 +8,10 @@ import {
 } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid'
-import { Link } from 'react-router-dom'
 import { SITE_NAME } from "../constants"
 import type { FurnitureItem } from "../constants/furniture"
 import { furnitureFilters } from "../constants/furniture"
-
-const PLACEHOLDER_SRC = '/shop-placeholder.png'
+import ProductCard from './ProductCard'
 
 const filters = furnitureFilters;
 
@@ -270,41 +268,13 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
                             ) : (
                                 <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:gap-x-8 xl:grid-cols-3">
                                     {filteredFurnitures.map((product) => (
-                                        <div
+                                        <ProductCard
                                             key={product.slug}
-                                            className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white"
-                                        >
-                                            <div className="aspect-h-3 aspect-w-4 bg-gray-200 sm:aspect-none group-hover:opacity-75 sm:h-96">
-                                                <img
-                                                    src={product.images?.[0] || PLACEHOLDER_SRC}
-                                                    alt={product.name}
-                                                    className="h-full w-full object-cover object-center sm:h-full sm:w-full"
-                                                    onError={(e) => {
-                                                        const img = e.currentTarget as HTMLImageElement
-                                                        if (!img.src.includes(PLACEHOLDER_SRC)) {
-                                                            img.src = PLACEHOLDER_SRC
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="flex flex-1 flex-col space-y-2 p-4">
-                                                <h3 className="text-sm font-medium text-gray-900">
-                                                    <Link to={`/furniture/${product.slug}`}>
-                                                        <span aria-hidden="true" className="absolute inset-0" />
-                                                        {product.name}
-                                                    </Link>
-                                                </h3>
-                                                <div className="flex flex-1 flex-col justify-end">
-                                                    <p className="text-sm text-gray-500">{product.brand}</p>
-                                                    <span className="text-sm text-gray-500">
-                                                        {/*{product.comfortLevel}*/}
-                                                    </span>
-                                                    <p className="text-base font-medium text-gray-900 mt-3">
-                                                        Call Store For Pricing
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            product={product}
+                                            to={`/furniture/${product.slug}`}
+                                            showComfort={false}
+                                            priceLabel="Call Store For Pricing"
+                                        />
                                     ))}
                                 </div>
                             )}

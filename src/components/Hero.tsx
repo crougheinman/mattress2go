@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import heroImage from '../assets/copa-hero-fill.webp';
+import heroImage from '../assets/mattress2go-hero-bg.jpg';
 
 const Hero = () => {
     return (
@@ -10,6 +10,7 @@ const Hero = () => {
                     alt=''
                     className='absolute inset-0 -z-10 h-full w-full object-cover'
                 />
+                <div className='absolute inset-0 -z-10 bg-black/40'></div>
 
                 <div
                     className='absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80'

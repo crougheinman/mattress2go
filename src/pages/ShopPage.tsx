@@ -61,12 +61,10 @@ const ShopPage = () => {
     return (
         <Layout title="Shop Mattress">
             <div className='bg-white'>
-                {loading ? (
-                    <div className='p-16 text-center text-gray-500'>Loading products...</div>
-                ) : error ? (
+                {error ? (
                     <div className='p-16 text-center text-red-600'>{error}</div>
                 ) : (
-                    <ShopPageFilters products={products} />
+                    <ShopPageFilters products={products} loading={loading} />
                 )}
             </div>
         </Layout>
