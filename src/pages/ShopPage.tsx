@@ -14,7 +14,7 @@ const ShopPage = () => {
         const fetchProducts = async () => {
             try {
                 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
-                const response = await axios.get(`${apiBaseUrl}/products`);
+                const response = await axios.get(`${apiBaseUrl}/products?category=Mattress`);
                 const apiProducts = response.data?.data?.products ?? [];
 
                 const normalizedProducts: Product[] = apiProducts.map((product: any) => ({

@@ -140,6 +140,15 @@ const ProductDetailPage: React.FC = () => {
         <Layout title={`${product.name}`}>
             <div className='bg-white'>
                 <div className='mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8'>
+                    <div className='mb-8'>
+                        <Link
+                            to="/shop"
+                            className='inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900'
+                        >
+                            <Icon icon='mdi:arrow-left' className='h-4 w-4' />
+                            Back
+                        </Link>
+                    </div>
                     <div className='lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8'>
                         {/* Image gallery */}
                         <ProductImages images={images} alt={`${product.brand_name ?? ''} ${product.name}`} />

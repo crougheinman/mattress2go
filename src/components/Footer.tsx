@@ -80,8 +80,8 @@ const Footer = () => {
                 <div className="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24">
                     <p className="text-xs leading-5 text-gray-500">
                         &copy; {currentYear} - Built by <a
-                            href="https://www.themilneempire.com"
-                            className="underline">The Milne Empire</a> - All rights reserved.
+                            href="https://gdyportfolio.vercel.app/"
+                            className="underline">Greg</a> - All rights reserved.
                     </p>
                 </div>
             </div>

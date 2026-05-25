@@ -31,6 +31,7 @@ export default function MattressShopFilters({ products: initialProducts, loading
    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
    const [selectedFilters, setSelectedFilters] = useState<Record<string, Set<string>>>({})
    const [filteredProducts, setFilteredProducts] = useState<Product[]>(initialProducts)
+   const [searchQuery, setSearchQuery] = useState('')
 
    useEffect(() => {
       const computedFilters = generateFiltersFromProducts(initialProducts)
@@ -63,10 +64,28 @@ export default function MattressShopFilters({ products: initialProducts, loading
 
    useEffect(() => {
       let filtered = initialProducts
-      const hasActiveFilters = Object.values(selectedFilters).some(filterSet => filterSet.size > 0)
+      const normalizedSearch = searchQuery.trim().toLowerCase()
+      const hasActiveFilters = normalizedSearch.length > 0 || Object.values(selectedFilters).some(filterSet => filterSet.size > 0)
 
       if (hasActiveFilters) {
          filtered = initialProducts.filter(product => {
+            if (normalizedSearch.length > 0) {
+               const searchValue = normalizedSearch
+               const matchesSearch = [
+                  product.name,
+                  product.brand,
+                  product.description,
+                  product.comfortLevel,
+                  product.color,
+                  product.size,
+               ]
+                  .filter(Boolean)
+                  .some(value => String(value).toLowerCase().includes(searchValue))
+
+               if (!matchesSearch) {
+                  return false
+               }
+            }
             return Object.entries(selectedFilters).every(([sectionId, selectedValues]) => {
                if (selectedValues.size === 0) return true
 
@@ -92,7 +111,7 @@ export default function MattressShopFilters({ products: initialProducts, loading
       }
 
       setFilteredProducts(filtered)
-   }, [selectedFilters, initialProducts])
+   }, [selectedFilters, initialProducts, searchQuery])
 
    const FilterCheckbox = ({
       section,
@@ -201,6 +220,17 @@ export default function MattressShopFilters({ products: initialProducts, loading
                <div className="border-b border-gray-200 py-10">
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900">Our Mattresses</h1>
                   <p className="mt-4 text-base text-gray-500">Find your perfect sleep solution at {SITE_NAME}</p>
+                  <div className="mt-6">
+                     <label htmlFor="product-search" className="sr-only">Search products</label>
+                     <input
+                        id="product-search"
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search mattresses by name, brand, or comfort"
+                        className="w-full rounded-xl border border-gray-300 bg-white py-3 px-4 text-sm text-gray-700 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                     />
+                  </div>
                </div>
 
                <div className="pb-24 pt-12 lg:grid lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">

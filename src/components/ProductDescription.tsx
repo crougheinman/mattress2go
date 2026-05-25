@@ -7,7 +7,7 @@ interface ProductDescriptionProps {
 const ALLOWED_TAGS = new Set([
     'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li',
     'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'table',
-    'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'div', 'span', 'ul', 'ol', 'li'
+    'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'div', 'span',
 ]);
 
 const ALLOWED_ATTRS: Record<string, string[]> = {
@@ -110,7 +110,7 @@ const ProductDescription: React.FC<ProductDescriptionProps> = ({ description }) 
     const sanitizedDescription = useMemo(() => sanitizeHtml(description), [description]);
 
     return (
-        <div className="space-y-4 prose prose-sm text-gray-700" dangerouslySetInnerHTML={{ __html: sanitizedDescription }} />
+        <div className="product-description-content space-y-4 prose prose-sm text-gray-700" dangerouslySetInnerHTML={{ __html: sanitizedDescription }} />
     );
 };
 
