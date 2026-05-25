@@ -7,7 +7,7 @@ interface ProductDescriptionProps {
 const ALLOWED_TAGS = new Set([
     'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li',
     'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'table',
-    'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'div', 'span'
+    'thead', 'tbody', 'tr', 'th', 'td', 'figure', 'figcaption', 'div', 'span', 'ul', 'ol', 'li'
 ]);
 
 const ALLOWED_ATTRS: Record<string, string[]> = {

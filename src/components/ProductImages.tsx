@@ -9,12 +9,21 @@ interface ProductImagesProps {
 
 const ProductImages: React.FC<ProductImagesProps> = ({ images, alt }) => {
     const [selectedImage, setSelectedImage] = useState(0);
+    const [isZoomed, setIsZoomed] = useState(false);
+    const [transformOrigin, setTransformOrigin] = useState({ x: 50, y: 50 });
 
     const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         const img = e.currentTarget;
         if (!img.src.includes(PLACEHOLDER_SRC)) {
             img.src = PLACEHOLDER_SRC;
         }
+    };
+
+    const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+        const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
+        const x = ((event.clientX - left) / width) * 100;
+        const y = ((event.clientY - top) / height) * 100;
+        setTransformOrigin({ x, y });
     };
 
     const hasImages = images && images.length > 0;
@@ -26,17 +35,25 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images, alt }) => {
     return (
         <div className="flex flex-col">
             {/* Main image display */}
-            <div className="aspect-h-1 aspect-w-1 w-full">
+            <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-xl bg-gray-100">
                 <div
                     role="tabpanel"
                     aria-labelledby={`tabs-${selectedImage}-tab`}
                     tabIndex={0}
+                    className="h-full w-full"
+                    onMouseMove={handleMouseMove}
+                    onMouseEnter={() => setIsZoomed(true)}
+                    onMouseLeave={() => setIsZoomed(false)}
                 >
                     <img
                         src={imageSrc}
                         alt={`${alt} ${selectedImage + 1}`}
-                        className="h-full w-full object-cover object-center sm:rounded-lg"
+                        className="h-full w-full object-cover object-center transition-transform duration-500 ease-out"
                         onError={handleError}
+                        style={{
+                            transformOrigin: `${transformOrigin.x}% ${transformOrigin.y}%`,
+                            transform: isZoomed ? 'scale(1.25)' : 'scale(1)',
+                        }}
                     />
                 </div>
             </div>

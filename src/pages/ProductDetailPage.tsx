@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { Icon } from '@iconify/react';
 import Layout from '../Layout';
 import ProductDescription from '../components/ProductDescription';
 import ProductImages from '../components/ProductImages';
@@ -94,7 +95,37 @@ const ProductDetailPage: React.FC = () => {
     if (loading) {
         return (
             <Layout title="Loading...">
-                <div className="py-16 text-center text-gray-600">Loading product...</div>
+                <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+                    <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+                        <div className="space-y-4">
+                            <div className="h-96 w-full overflow-hidden rounded-3xl bg-gray-200 animate-pulse" />
+                            <div className="grid grid-cols-4 gap-4">
+                                {Array.from({ length: 4 }).map((_, idx) => (
+                                    <div key={idx} className="h-24 rounded-2xl bg-gray-200 animate-pulse" />
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
+                            <div className="h-10 w-3/4 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="mt-6 h-8 w-1/3 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="mt-6 space-y-4">
+                                <div className="h-4 rounded-full bg-gray-200 animate-pulse" />
+                                <div className="h-4 w-5/6 rounded-full bg-gray-200 animate-pulse" />
+                                <div className="h-4 w-2/3 rounded-full bg-gray-200 animate-pulse" />
+                            </div>
+                            <div className="mt-8 h-12 w-40 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="mt-10 rounded-3xl border border-gray-200 bg-gray-100 p-4">
+                                <div className="h-5 w-24 rounded-full bg-gray-200 animate-pulse" />
+                                <div className="mt-4 space-y-3">
+                                    <div className="h-4 w-5/6 rounded-full bg-gray-200 animate-pulse" />
+                                    <div className="h-4 w-4/6 rounded-full bg-gray-200 animate-pulse" />
+                                    <div className="h-4 w-2/3 rounded-full bg-gray-200 animate-pulse" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </Layout>
         );
     }
@@ -149,17 +180,52 @@ const ProductDetailPage: React.FC = () => {
                                 <h2 id='details-heading' className='sr-only'>Additional details</h2>
 
                                 <div className='divide-y divide-gray-200 border-t'>
-                                    <div>
+                                    <div className='mt-4'>
                                         <span className='text-sm font-medium text-gray-900'>
                                             Details
                                         </span>
-                                        <div className='prose prose-sm pb-6' id='disclosure-1'>
-                                            <ul role='list'>
-                                                {product.brand_name && <li>Brand: {product.brand_name}</li>}
-                                                {product.name && <li>Model: {product.name}</li>}
-                                                {product.size && <li>Size: {product.size}</li>}
-                                                {product.comfort_level && <li>Comfort Level: {product.comfort_level}</li>}
-                                                {product.color && <li>Color: {product.color}</li>}
+                                        <div className='prose prose-sm pb-6 ml-2' id='disclosure-1'>
+                                            <ul role='list' className='space-y-1'>
+                                                {product.brand_name && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Brand: {product.brand_name}</span>
+                                                    </li>
+                                                )}
+                                                {product.name && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Model: {product.name}</span>
+                                                    </li>
+                                                )}
+                                                {product.size && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Size: {product.size}</span>
+                                                    </li>
+                                                )}
+                                                {product.comfort_level && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Comfort Level: {product.comfort_level}</span>
+                                                    </li>
+                                                )}
+                                                {product.color && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Color: {product.color}</span>
+                                                    </li>
+                                                )}
                                             </ul>
                                         </div>
                                     </div>
