@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import apiClient from '../apiClient';
 import { SITE_NAME, STORE_INFO } from '../constants';
 import Layout from '../Layout';
@@ -12,6 +12,9 @@ const Contact = () => {
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [recaptchaReady, setRecaptchaReady] = useState(false);
+
+    const RECAPTCHA_SITE_KEY = import.meta.env.VITE_APP_RECAPTCHA_SITE_KEY as string;
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -25,13 +28,36 @@ const Contact = () => {
 
         setLoading(true);
 
+        if (!RECAPTCHA_SITE_KEY) {
+            setErrorMessage('reCAPTCHA is not configured. Please contact support.');
+            setLoading(false);
+            return;
+        }
+
+        if (!recaptchaReady) {
+            setErrorMessage('Please wait while reCAPTCHA loads and try again.');
+            setLoading(false);
+            return;
+        }
+
+        const executeRecaptcha = async () => {
+            const grecaptcha = (window as any).grecaptcha;
+            if (!grecaptcha || typeof grecaptcha.execute !== 'function') {
+                throw new Error('reCAPTCHA is not ready.');
+            }
+
+            return await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact' });
+        };
+
         try {
+            const recaptchaToken = await executeRecaptcha();
             await apiClient.post('/inquiries', {
                 firstname: firstName.trim(),
                 lastname: lastName.trim(),
                 emailaddress: email.trim(),
                 phonenumber: phone.trim(),
                 message: message.trim(),
+                recaptcha_token: recaptchaToken,
                 store_id: 1,
             });
 
@@ -48,6 +74,35 @@ const Contact = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (!RECAPTCHA_SITE_KEY) {
+            return;
+        }
+
+        const existingScript = document.querySelector<HTMLScriptElement>(`script[src^="https://www.google.com/recaptcha/api.js?render="]`);
+        if (existingScript) {
+            if ((window as any).grecaptcha) {
+                (window as any).grecaptcha.ready(() => setRecaptchaReady(true));
+            }
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            if ((window as any).grecaptcha) {
+                (window as any).grecaptcha.ready(() => setRecaptchaReady(true));
+            }
+        };
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, [RECAPTCHA_SITE_KEY]);
 
     return (
         <Layout title="Contact Us">
@@ -162,111 +217,127 @@ const Contact = () => {
                             </dl>
                         </div>
                     </div>
-                    <form onSubmit={handleSubmit} className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'>
+                    <div className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'>
                         <div className='mx-auto max-w-xl lg:mr-0 lg:max-w-lg'>
                             {errorMessage && (
                                 <div className='mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700'>
                                     {errorMessage}
                                 </div>
                             )}
-                            {successMessage && (
-                                <div className='mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700'>
-                                    {successMessage}
+                            <p className='mb-4 text-sm text-gray-500'>This form is protected by Google reCAPTCHA to prevent spam.</p>
+                            {!recaptchaReady && (
+                                <div className='mb-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700'>
+                                    Loading reCAPTCHA verification. Please wait before submitting.
                                 </div>
                             )}
-                            <div className='grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2'>
-                                <div>
-                                    <label htmlFor='first-name' className='block text-sm font-semibold leading-6 text-gray-900'>
-                                        First name
-                                    </label>
-                                    <div className='mt-2.5'>
-                                        <input
-                                            type='text'
-                                            name='first-name'
-                                            id='first-name'
-                                            autoComplete='given-name'
-                                            value={firstName}
-                                            onChange={(event) => setFirstName(event.target.value)}
-                                            className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
-                                        />
+                            {successMessage ? (
+                                <div className='rounded-4xl border border-emerald-200 bg-emerald-50 p-8 text-center shadow-sm'>
+                                    <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm'>
+                                        <svg className='h-10 w-10 text-emerald-600' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'>
+                                            <path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7' />
+                                        </svg>
                                     </div>
+                                    <h3 className='mt-6 text-2xl font-semibold text-gray-900'>Message sent</h3>
+                                    <p className='mt-4 text-sm leading-6 text-gray-600'>
+                                        {successMessage}
+                                    </p>
                                 </div>
-                                <div>
-                                    <label htmlFor='last-name' className='block text-sm font-semibold leading-6 text-gray-900'>
-                                        Last name
-                                    </label>
-                                    <div className='mt-2.5'>
-                                        <input
-                                            type='text'
-                                            name='last-name'
-                                            id='last-name'
-                                            autoComplete='family-name'
-                                            value={lastName}
-                                            onChange={(event) => setLastName(event.target.value)}
-                                            className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
-                                        />
+                            ) : (
+                                <form onSubmit={handleSubmit} className='space-y-6'>
+                                    <div className='grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2'>
+                                        <div>
+                                            <label htmlFor='first-name' className='block text-sm font-semibold leading-6 text-gray-900'>
+                                                First name
+                                            </label>
+                                            <div className='mt-2.5'>
+                                                <input
+                                                    type='text'
+                                                    name='first-name'
+                                                    id='first-name'
+                                                    autoComplete='given-name'
+                                                    value={firstName}
+                                                    onChange={(event) => setFirstName(event.target.value)}
+                                                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label htmlFor='last-name' className='block text-sm font-semibold leading-6 text-gray-900'>
+                                                Last name
+                                            </label>
+                                            <div className='mt-2.5'>
+                                                <input
+                                                    type='text'
+                                                    name='last-name'
+                                                    id='last-name'
+                                                    autoComplete='family-name'
+                                                    value={lastName}
+                                                    onChange={(event) => setLastName(event.target.value)}
+                                                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className='sm:col-span-2'>
+                                            <label htmlFor='email' className='block text-sm font-semibold leading-6 text-gray-900'>
+                                                Email
+                                            </label>
+                                            <div className='mt-2.5'>
+                                                <input
+                                                    type='email'
+                                                    name='email'
+                                                    id='email'
+                                                    autoComplete='email'
+                                                    value={email}
+                                                    onChange={(event) => setEmail(event.target.value)}
+                                                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className='sm:col-span-2'>
+                                            <label htmlFor='phone-number' className='block text-sm font-semibold leading-6 text-gray-900'>
+                                                Phone number
+                                            </label>
+                                            <div className='mt-2.5'>
+                                                <input
+                                                    type='tel'
+                                                    name='phone-number'
+                                                    id='phone-number'
+                                                    autoComplete='tel'
+                                                    value={phone}
+                                                    onChange={(event) => setPhone(event.target.value)}
+                                                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className='sm:col-span-2'>
+                                            <label htmlFor='message' className='block text-sm font-semibold leading-6 text-gray-900'>
+                                                Message
+                                            </label>
+                                            <div className='mt-2.5'>
+                                                <textarea
+                                                    name='message'
+                                                    id='message'
+                                                    rows={4}
+                                                    value={message}
+                                                    onChange={(event) => setMessage(event.target.value)}
+                                                    className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className='sm:col-span-2'>
-                                    <label htmlFor='email' className='block text-sm font-semibold leading-6 text-gray-900'>
-                                        Email
-                                    </label>
-                                    <div className='mt-2.5'>
-                                        <input
-                                            type='email'
-                                            name='email'
-                                            id='email'
-                                            autoComplete='email'
-                                            value={email}
-                                            onChange={(event) => setEmail(event.target.value)}
-                                            className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
-                                        />
+                                    <div className='mt-8 flex justify-end'>
+                                        <button
+                                            type='submit'
+                                            disabled={loading}
+                                            className='rounded-md bg-copa-blue-700 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-copa-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copa-blue-600'
+                                        >
+                                            {loading ? 'Sending...' : 'Send message'}
+                                        </button>
                                     </div>
-                                </div>
-                                <div className='sm:col-span-2'>
-                                    <label htmlFor='phone-number' className='block text-sm font-semibold leading-6 text-gray-900'>
-                                        Phone number
-                                    </label>
-                                    <div className='mt-2.5'>
-                                        <input
-                                            type='tel'
-                                            name='phone-number'
-                                            id='phone-number'
-                                            autoComplete='tel'
-                                            value={phone}
-                                            onChange={(event) => setPhone(event.target.value)}
-                                            className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
-                                        />
-                                    </div>
-                                </div>
-                                <div className='sm:col-span-2'>
-                                    <label htmlFor='message' className='block text-sm font-semibold leading-6 text-gray-900'>
-                                        Message
-                                    </label>
-                                    <div className='mt-2.5'>
-                                        <textarea
-                                            name='message'
-                                            id='message'
-                                            rows={4}
-                                            value={message}
-                                            onChange={(event) => setMessage(event.target.value)}
-                                            className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='mt-8 flex justify-end'>
-                                <button
-                                    type='submit'
-                                    disabled={loading}
-                                    className='rounded-md bg-copa-blue-700 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-copa-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copa-blue-600'
-                                >
-                                    {loading ? 'Sending...' : 'Send message'}
-                                    Send message
-                                </button>
-                            </div>
+                                </form>
+                            )}
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </Layout>
