@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../apiClient';
 import { Icon } from '@iconify/react';
 import Layout from '../Layout';
 import ProductDescription from '../components/ProductDescription';
@@ -54,10 +54,8 @@ const ProductDetailPage: React.FC = () => {
             return;
         }
 
-        const apiBase = import.meta.env.VITE_API_BASE_URL || '';
-
-        axios
-            .get(`${apiBase}/products`)
+        apiClient
+            .get('/products')
             .then((response) => {
                 const listProducts = response.data?.data?.products || [];
                 const matched = listProducts.find((item: any) => item.slug === slug);
@@ -66,7 +64,7 @@ const ProductDetailPage: React.FC = () => {
                     return;
                 }
 
-                return axios.get(`${apiBase}/products/${matched.id}`);
+                return apiClient.get(`/products/${matched.id}`);
             })
             .then((response) => {
                 if (!response) {

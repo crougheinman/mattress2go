@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import apiClient from '../apiClient';
 import ShopPageFilters from '../components/ShopPageFilters';
 import Layout from '../Layout';
 import type { Product } from '../types';
@@ -13,8 +13,7 @@ const ShopPage = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
-                const response = await axios.get(`${apiBaseUrl}/products?category=Mattress`);
+                const response = await apiClient.get('/products?category=Mattress');
                 const apiProducts = response.data?.data?.products ?? [];
 
                 const normalizedProducts: Product[] = apiProducts.map((product: any) => ({

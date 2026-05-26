@@ -1,7 +1,54 @@
+import { useState, type FormEvent } from 'react';
+import apiClient from '../apiClient';
 import { SITE_NAME, STORE_INFO } from '../constants';
 import Layout from '../Layout';
 
 const Contact = () => {
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setErrorMessage(null);
+        setSuccessMessage(null);
+
+        if (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim() || !message.trim()) {
+            setErrorMessage('Please complete all fields before sending your inquiry.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            await apiClient.post('/inquiries', {
+                firstname: firstName.trim(),
+                lastname: lastName.trim(),
+                emailaddress: email.trim(),
+                phonenumber: phone.trim(),
+                message: message.trim(),
+                store_id: 1,
+            });
+
+            setSuccessMessage('Your inquiry was submitted successfully. We will be in touch soon.');
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setPhone('');
+            setMessage('');
+        } catch (error: any) {
+            const serverMessage = error?.response?.data?.message || 'Unable to submit your inquiry. Please try again later.';
+            setErrorMessage(serverMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <Layout title="Contact Us">
             <div className='relative isolate bg-white'>
@@ -115,8 +162,18 @@ const Contact = () => {
                             </dl>
                         </div>
                     </div>
-                    <form action='#' method='POST' className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'>
+                    <form onSubmit={handleSubmit} className='px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:py-48'>
                         <div className='mx-auto max-w-xl lg:mr-0 lg:max-w-lg'>
+                            {errorMessage && (
+                                <div className='mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700'>
+                                    {errorMessage}
+                                </div>
+                            )}
+                            {successMessage && (
+                                <div className='mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700'>
+                                    {successMessage}
+                                </div>
+                            )}
                             <div className='grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2'>
                                 <div>
                                     <label htmlFor='first-name' className='block text-sm font-semibold leading-6 text-gray-900'>
@@ -128,6 +185,8 @@ const Contact = () => {
                                             name='first-name'
                                             id='first-name'
                                             autoComplete='given-name'
+                                            value={firstName}
+                                            onChange={(event) => setFirstName(event.target.value)}
                                             className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
                                         />
                                     </div>
@@ -142,6 +201,8 @@ const Contact = () => {
                                             name='last-name'
                                             id='last-name'
                                             autoComplete='family-name'
+                                            value={lastName}
+                                            onChange={(event) => setLastName(event.target.value)}
                                             className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
                                         />
                                     </div>
@@ -156,6 +217,8 @@ const Contact = () => {
                                             name='email'
                                             id='email'
                                             autoComplete='email'
+                                            value={email}
+                                            onChange={(event) => setEmail(event.target.value)}
                                             className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
                                         />
                                     </div>
@@ -170,6 +233,8 @@ const Contact = () => {
                                             name='phone-number'
                                             id='phone-number'
                                             autoComplete='tel'
+                                            value={phone}
+                                            onChange={(event) => setPhone(event.target.value)}
                                             className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
                                         />
                                     </div>
@@ -183,6 +248,8 @@ const Contact = () => {
                                             name='message'
                                             id='message'
                                             rows={4}
+                                            value={message}
+                                            onChange={(event) => setMessage(event.target.value)}
                                             className='block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-copa-blue-600 sm:text-sm sm:leading-6'
                                         />
                                     </div>
@@ -191,8 +258,10 @@ const Contact = () => {
                             <div className='mt-8 flex justify-end'>
                                 <button
                                     type='submit'
+                                    disabled={loading}
                                     className='rounded-md bg-copa-blue-700 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-copa-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copa-blue-600'
                                 >
+                                    {loading ? 'Sending...' : 'Send message'}
                                     Send message
                                 </button>
                             </div>
