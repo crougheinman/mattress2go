@@ -128,10 +128,18 @@ export const SOCIALS: Social[] = [
 
 export const STORE_INFO = {
   address:
+    import.meta.env.VITE_APP_CONTACT_ADDRESS || import.meta.env.APP_CONTACT_ADDRESS ||
     "44360 West Edison Suite 100, Maricopa, AZ, United States, Arizona 85138",
-  phone: "(520) 217-1942",
-  email: "copamattressandfurniture@gmail.com",
+  phone:
+    import.meta.env.VITE_APP_CONTACT_NUMBER || import.meta.env.APP_CONTACT_NUMBER ||
+    "(520) 217-1942",
+  email:
+    import.meta.env.VITE_APP_EMAIL || import.meta.env.APP_EMAIL ||
+    "copamattressandfurniture@gmail.com",
 };
+
+const storeLocation = STORE_INFO.address;
+const storeLocationQuery = encodeURIComponent(storeLocation);
 
 export const FOOTER_LINKS: FooterSection[] = [
   {
@@ -170,7 +178,7 @@ export const FOOTER_LINKS: FooterSection[] = [
       { label: `Call: ${STORE_INFO.phone}`, href: `tel:${STORE_INFO.phone}` },
       {
         label: `Visit: ${STORE_INFO.address}`,
-        href: "https://www.google.com/maps/place/44360+W+Edison+Rd+Ste+100,+Maricopa,+AZ+85138/@33.0657134,-112.0475758,17z/data=!3m1!4b1!4m6!3m5!1s0x872afb2a895668a5:0x2639a721195e2e0e!8m2!3d33.0657089!4d-112.0450009!16s%2Fg%2F11tg5sxgsb?entry=ttu&g_ep=EgoyMDI0MTAxNC4wIKXMDSoASAFQAw%3D%3D",
+        href: `https://www.google.com/maps/search/?api=1&query=${storeLocationQuery}`,
       },
     ],
   },
