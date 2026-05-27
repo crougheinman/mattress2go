@@ -15,6 +15,7 @@ const Contact = () => {
     const [recaptchaReady, setRecaptchaReady] = useState(false);
 
     const RECAPTCHA_SITE_KEY = import.meta.env.VITE_APP_RECAPTCHA_SITE_KEY as string;
+    const STORE_ID = Number(import.meta.env.VITE_APP_STORE_ID ?? 0);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -30,6 +31,12 @@ const Contact = () => {
 
         if (!RECAPTCHA_SITE_KEY) {
             setErrorMessage('reCAPTCHA is not configured. Please contact support.');
+            setLoading(false);
+            return;
+        }
+
+        if (!STORE_ID) {
+            setErrorMessage('Store ID is not configured. Please contact support.');
             setLoading(false);
             return;
         }
@@ -58,7 +65,7 @@ const Contact = () => {
                 phonenumber: phone.trim(),
                 message: message.trim(),
                 recaptcha_token: recaptchaToken,
-                store_id: 1,
+                store_id: STORE_ID,
             });
 
             setSuccessMessage('Your inquiry was submitted successfully. We will be in touch soon.');
@@ -224,7 +231,6 @@ const Contact = () => {
                                     {errorMessage}
                                 </div>
                             )}
-                            <p className='mb-4 text-sm text-gray-500'>This form is protected by Google reCAPTCHA to prevent spam.</p>
                             {!recaptchaReady && (
                                 <div className='mb-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700'>
                                     Loading reCAPTCHA verification. Please wait before submitting.
