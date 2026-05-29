@@ -28,7 +28,7 @@ type FilterSection = {
 }
 
 const isInDimensionRange = (value: number, rangeKey: string, dimensionType: 'width' | 'depth') => {
-    const ranges = {
+    const ranges: Record<'width' | 'depth', Record<string, { min: number; max: number }>> = {
         width: {
             'small': { min: 0, max: 60 },
             'medium': { min: 60, max: 80 },
@@ -41,7 +41,7 @@ const isInDimensionRange = (value: number, rangeKey: string, dimensionType: 'wid
         },
     }
 
-    const range = ranges[dimensionType][rangeKey as keyof typeof ranges[typeof dimensionType]]
+    const range = ranges[dimensionType][rangeKey]
     if (!range) return false
     return value >= range.min && value < range.max
 }
