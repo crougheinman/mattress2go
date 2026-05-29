@@ -16,6 +16,7 @@ export interface FurnitureItem {
    description: string;
    dimensions: Dimensions;
    images?: string[];
+   thumbnail_path?: string;
    features?: string[];
 }
 
@@ -140,7 +141,7 @@ interface Filter {
    options: FilterOption[];
 }
 
-const generateFurnitureFilters = (products: FurnitureItem[]): Filter[] => {
+export const generateFurnitureFilters = (products: FurnitureItem[]): Filter[] => {
    // Initialize collectors for unique values
    const uniqueValues = {
       category: new Set<string>(),

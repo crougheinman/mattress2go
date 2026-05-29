@@ -31,6 +31,13 @@ interface ProductDetail {
     comfort_level?: string;
     color?: string;
     size?: string;
+    category?: string;
+    sub_category?: string;
+    width?: string;
+    depth?: string;
+    height?: string;
+    weight?: string;
+    features?: string[];
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
@@ -133,6 +140,8 @@ const ProductDetailPage: React.FC = () => {
     }
 
     const images = product.gallery_images?.map((image) => image.path) ?? [];
+    const isFurniture = product.category === 'Furniture';
+    const features = Array.isArray(product.features) ? product.features : [];
 
     return (
         <Layout title={`${product.name}`}>
@@ -149,7 +158,7 @@ const ProductDetailPage: React.FC = () => {
                     </div>
                     <div className='lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8'>
                         {/* Image gallery */}
-                        <ProductImages images={images} alt={`${product.brand_name ?? ''} ${product.name}`} />
+                        <ProductImages images={images} alt={`${product.brand_name ?? ''} ${product.name}`} features={isFurniture ? features : []} />
 
                         {/* Product info */}
                         <div className='mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0'>
@@ -215,6 +224,46 @@ const ProductDetailPage: React.FC = () => {
                                                             <Icon icon='mdi:arrow-right' className='h-4 w-4' />
                                                         </span>
                                                         <span className='text-sm leading-6 text-gray-700'>Size: {product.size}</span>
+                                                    </li>
+                                                )}
+                                                {isFurniture && product.sub_category && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Sub Category: {product.sub_category}</span>
+                                                    </li>
+                                                )}
+                                                {isFurniture && product.width && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Width: {product.width}</span>
+                                                    </li>
+                                                )}
+                                                {isFurniture && product.depth && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Depth: {product.depth}</span>
+                                                    </li>
+                                                )}
+                                                {isFurniture && product.height && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Height: {product.height}</span>
+                                                    </li>
+                                                )}
+                                                {isFurniture && product.weight && (
+                                                    <li className='flex items-start gap-3'>
+                                                        <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
+                                                            <Icon icon='mdi:arrow-right' className='h-4 w-4' />
+                                                        </span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Weight: {product.weight}</span>
                                                     </li>
                                                 )}
                                                 {product.comfort_level && (

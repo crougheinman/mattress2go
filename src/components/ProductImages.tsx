@@ -5,9 +5,10 @@ const PLACEHOLDER_SRC = '/shop-placeholder.png';
 interface ProductImagesProps {
     images: string[];
     alt: string;
+    features?: string[];
 }
 
-const ProductImages: React.FC<ProductImagesProps> = ({ images, alt }) => {
+const ProductImages: React.FC<ProductImagesProps> = ({ images, alt, features = [] }) => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [isZoomed, setIsZoomed] = useState(false);
     const [transformOrigin, setTransformOrigin] = useState({ x: 50, y: 50 });
@@ -35,7 +36,7 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images, alt }) => {
     return (
         <div className="flex flex-col">
             {/* Main image display */}
-            <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-xl bg-gray-100">
+            <div className="relative aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-xl bg-gray-100">
                 <div
                     role="tabpanel"
                     aria-labelledby={`tabs-${selectedImage}-tab`}
@@ -56,6 +57,22 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images, alt }) => {
                         }}
                     />
                 </div>
+
+                {features.length > 0 && (
+                    <>
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
+                        <div className="pointer-events-none absolute bottom-3 left-3 flex max-w-[85%] flex-wrap gap-1.5">
+                            {features.map((feature, index) => (
+                                <span
+                                    key={index}
+                                    className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-sm"
+                                >
+                                    {feature}
+                                </span>
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Thumbnail selector */}

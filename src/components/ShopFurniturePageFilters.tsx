@@ -1,8 +1,11 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import {
     Dialog,
     DialogBackdrop,
-    DialogPanel, Disclosure,
+    DialogPanel,
+    Disclosure,
     DisclosureButton,
     DisclosurePanel,
 } from '@headlessui/react'
@@ -10,50 +13,59 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/20/solid'
 import { SITE_NAME } from "../constants"
 import type { FurnitureItem } from "../constants/furniture"
-import { furnitureFilters } from "../constants/furniture"
+import { generateFurnitureFilters } from "../constants/furniture"
 import ProductCard from './ProductCard'
 
-const filters = furnitureFilters;
+type FilterOption = {
+    value: string;
+    label: string;
+}
 
-const getPropertyValue = (obj: any, path: string) => {
-    const parts = path.split('.');
-    return parts.reduce((acc, part) => (acc && acc[part] !== undefined ? acc[part] : undefined), obj);
-};
+type FilterSection = {
+    id: string;
+    name: string;
+    options: FilterOption[];
+}
 
 const isInDimensionRange = (value: number, rangeKey: string, dimensionType: 'width' | 'depth') => {
     const ranges = {
         width: {
             'small': { min: 0, max: 60 },
             'medium': { min: 60, max: 80 },
-            'large': { min: 80, max: Infinity }
+            'large': { min: 80, max: Infinity },
         },
         depth: {
             'shallow': { min: 0, max: 40 },
             'deep': { min: 40, max: 60 },
-            'extra-deep': { min: 60, max: Infinity }
-        }
-    };
+            'extra-deep': { min: 60, max: Infinity },
+        },
+    }
 
-    const range = ranges[dimensionType][rangeKey as keyof typeof ranges[typeof dimensionType]];
-    // @ts-ignore
-    return value >= range.min && value < range.max;
-};
+    const range = ranges[dimensionType][rangeKey as keyof typeof ranges[typeof dimensionType]]
+    if (!range) return false
+    return value >= range.min && value < range.max
+}
 
-export default function ShopFurniturePageFilters({ furniture: initialFurniture }: { furniture: FurnitureItem[] }) {
+export default function ShopFurniturePageFilters({ furniture: initialFurniture, loading = false }: { furniture: FurnitureItem[]; loading?: boolean }) {
+    const [filters, setFilters] = useState<FilterSection[]>([])
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
     const [selectedFilters, setSelectedFilters] = useState<Record<string, Set<string>>>({})
-    const [filteredFurnitures, setFilteredFurnitures] = useState(initialFurniture)
+    const [filteredFurnitures, setFilteredFurnitures] = useState<FurnitureItem[]>(initialFurniture)
+    const [searchQuery, setSearchQuery] = useState('')
 
-    // Initialize selected filters
     useEffect(() => {
+        const computedFilters = generateFurnitureFilters(initialFurniture)
+        setFilters(computedFilters)
+
         const initialSelectedFilters: Record<string, Set<string>> = {}
-        filters.forEach(section => {
+        computedFilters.forEach(section => {
             initialSelectedFilters[section.id] = new Set()
         })
-        setSelectedFilters(initialSelectedFilters)
-    }, [])
 
-    // Handle filter changes
+        setSelectedFilters(initialSelectedFilters)
+        setFilteredFurnitures(initialFurniture)
+    }, [initialFurniture])
+
     const handleFilterChange = (sectionId: string, value: string, checked: boolean) => {
         setSelectedFilters(prev => {
             const newFilters = { ...prev }
@@ -70,36 +82,45 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
         })
     }
 
-    // Apply filters to furniture
     useEffect(() => {
         let filtered = initialFurniture
-
-        // Only filter if there are any selected filters
-        const hasActiveFilters = Object.values(selectedFilters).some(filterSet => filterSet.size > 0)
+        const normalizedSearch = searchQuery.trim().toLowerCase()
+        const hasActiveFilters = normalizedSearch.length > 0 || Object.values(selectedFilters).some(filterSet => filterSet.size > 0)
 
         if (hasActiveFilters) {
             filtered = initialFurniture.filter(product => {
+                if (normalizedSearch.length > 0) {
+                    const matchesSearch = [
+                        product.name,
+                        product.brand,
+                        product.description,
+                        product.category,
+                        ...(product.features ?? []),
+                    ]
+                        .filter(Boolean)
+                        .some(value => String(value).toLowerCase().includes(normalizedSearch))
+
+                    if (!matchesSearch) {
+                        return false
+                    }
+                }
+
                 return Object.entries(selectedFilters).every(([sectionId, selectedValues]) => {
                     if (selectedValues.size === 0) return true
 
-                    // Handle dimension filters (width and depth)
                     if (sectionId === 'width' || sectionId === 'depth') {
-                        const dimensionValue = getPropertyValue(product, `dimensions.${sectionId}`)
+                        const dimensionValue = product.dimensions?.[sectionId]
                         if (dimensionValue === undefined) return false
-
                         return Array.from(selectedValues).some(rangeKey =>
-                            isInDimensionRange(dimensionValue, rangeKey, sectionId as 'width' | 'depth')
+                            isInDimensionRange(dimensionValue, rangeKey, sectionId)
                         )
                     }
 
-                    // Handle array-based filters (features)
                     if (sectionId === 'features') {
-                        const productFeatures = product[sectionId as keyof FurnitureItem]
-                        return Array.isArray(productFeatures) &&
-                            Array.from(selectedValues).some(value => (productFeatures as string[]).includes(value))
+                        return Array.isArray(product.features) &&
+                            Array.from(selectedValues).some(value => product.features!.includes(value))
                     }
 
-                    // Handle regular filters
                     const productValue = product[sectionId as keyof FurnitureItem]
                     return selectedValues.has(String(productValue))
                 })
@@ -107,21 +128,20 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
         }
 
         setFilteredFurnitures(filtered)
-    }, [selectedFilters, initialFurniture])
+    }, [selectedFilters, initialFurniture, searchQuery])
 
     const FilterCheckbox = ({
         section,
         option,
         optionIdx,
-        isMobile = false
+        isMobile = false,
     }: {
-        section: typeof filters[0],
-        option: typeof filters[0]['options'][0],
-        optionIdx: number,
+        section: FilterSection
+        option: FilterOption
+        optionIdx: number
         isMobile?: boolean
     }) => {
         const id = `${section.id}-${optionIdx}${isMobile ? '-mobile' : ''}`
-        // @ts-ignore
         const isChecked = selectedFilters[section.id]?.has(option.value)
 
         return (
@@ -131,7 +151,6 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
                     name={`${section.id}[]`}
                     type="checkbox"
                     checked={isChecked}
-                    // @ts-ignore
                     onChange={(e) => handleFilterChange(section.id, option.value, e.target.checked)}
                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
@@ -148,16 +167,11 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
     return (
         <div className="bg-white">
             <div>
-                {/* Mobile filter dialog */}
                 <Dialog open={mobileFiltersOpen} onClose={setMobileFiltersOpen} className="relative z-40 lg:hidden">
-                    <DialogBackdrop
-                        className="fixed inset-0 bg-black bg-opacity-25"
-                    />
+                    <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-25" />
 
                     <div className="fixed inset-0 z-40 flex">
-                        <DialogPanel
-                            className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-6 shadow-xl"
-                        >
+                        <DialogPanel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-6 shadow-xl">
                             <div className="flex items-center justify-between px-4">
                                 <h2 className="text-lg font-medium text-gray-900">Filters</h2>
                                 <button
@@ -171,39 +185,50 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
                                 </button>
                             </div>
 
-                            {/* Filters */}
-                            <form className="mt-4">
-                                {filters.map((section) => (
-                                    <Disclosure key={section.name} as="div" className="border-t border-gray-200 pb-4 pt-4">
-                                        <fieldset>
-                                            <legend className="w-full px-2">
-                                                <DisclosureButton className="group flex w-full items-center justify-between p-2 text-gray-400 hover:text-gray-500">
-                                                    <span className="text-sm font-medium text-gray-900">{section.name}</span>
-                                                    <span className="ml-6 flex h-7 items-center">
-                                                        <ChevronDownIcon
-                                                            className="h-5 w-5 rotate-0 transform group-data-open:-rotate-180"
-                                                        />
-                                                    </span>
-                                                </DisclosureButton>
-                                            </legend>
-                                            <DisclosurePanel className="px-4 pb-2 pt-4">
-                                                <div className="space-y-6">
-                                                    {section.options.map((option, optionIdx) => (
-                                                        <FilterCheckbox
-                                                            // @ts-ignore
-                                                            key={option.value}
-                                                            section={section}
-                                                            option={option}
-                                                            optionIdx={optionIdx}
-                                                            isMobile={true}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </DisclosurePanel>
-                                        </fieldset>
-                                    </Disclosure>
-                                ))}
-                            </form>
+                            {loading ? (
+                                <div className="space-y-4 px-4">
+                                    {Array.from({ length: 3 }).map((_, idx) => (
+                                        <div key={idx} className="rounded-3xl border border-gray-200 bg-gray-100 p-4">
+                                            <div className="mb-4 h-5 w-36 rounded-full bg-gray-200 animate-pulse" />
+                                            <div className="space-y-3">
+                                                <div className="h-4 rounded-full bg-gray-200 animate-pulse" />
+                                                <div className="h-4 rounded-full bg-gray-200 animate-pulse" />
+                                                <div className="h-4 w-5/6 rounded-full bg-gray-200 animate-pulse" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <form className="mt-4">
+                                    {filters.map((section) => (
+                                        <Disclosure key={section.name} as="div" className="border-t border-gray-200 pb-4 pt-4">
+                                            <fieldset>
+                                                <legend className="w-full px-2">
+                                                    <DisclosureButton className="group flex w-full items-center justify-between p-2 text-gray-400 hover:text-gray-500">
+                                                        <span className="text-sm font-medium text-gray-900">{section.name}</span>
+                                                        <span className="ml-6 flex h-7 items-center">
+                                                            <ChevronDownIcon className="h-5 w-5 rotate-0 transform group-data-open:-rotate-180" />
+                                                        </span>
+                                                    </DisclosureButton>
+                                                </legend>
+                                                <DisclosurePanel className="px-4 pb-2 pt-4">
+                                                    <div className="space-y-6">
+                                                        {section.options.map((option, optionIdx) => (
+                                                            <FilterCheckbox
+                                                                key={option.value}
+                                                                section={section}
+                                                                option={option}
+                                                                optionIdx={optionIdx}
+                                                                isMobile={true}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </DisclosurePanel>
+                                            </fieldset>
+                                        </Disclosure>
+                                    ))}
+                                </form>
+                            )}
                         </DialogPanel>
                     </div>
                 </Dialog>
@@ -211,9 +236,18 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
                 <main className="mx-auto max-w-2xl px-4 lg:max-w-7xl lg:px-8">
                     <div className="border-b border-gray-200 py-10">
                         <h1 className="text-4xl font-bold tracking-tight text-gray-900">Our Furniture</h1>
-                        <p className="mt-4 text-base text-gray-500">
-                            Find furnishings that fit your life at {SITE_NAME}
-                        </p>
+                        <p className="mt-4 text-base text-gray-500">Find furnishings that fit your life at {SITE_NAME}</p>
+                        <div className="mt-6">
+                            <label htmlFor="furniture-search" className="sr-only">Search furniture</label>
+                            <input
+                                id="furniture-search"
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search furniture by name, brand, or category"
+                                className="w-full rounded-xl border border-gray-300 bg-white py-3 px-4 text-sm text-gray-700 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            />
+                        </div>
                     </div>
 
                     <div className="pb-24 pt-12 lg:grid lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
@@ -230,35 +264,75 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
                             </button>
 
                             <div className="hidden lg:block">
-                                <form className="space-y-10 divide-y divide-gray-200">
-                                    {filters.map((section, sectionIdx) => (
-                                        <div key={section.name} className={sectionIdx === 0 ? 'pb-10' : 'py-10'}>
-                                            <fieldset>
-                                                <legend className="block text-sm font-medium text-gray-900">{section.name}</legend>
-                                                <div className="space-y-3 pt-6">
-                                                    {section.options.map((option, optionIdx) => (
-                                                        <FilterCheckbox
-                                                            // @ts-ignore
-                                                            key={option.value}
-                                                            section={section}
-                                                            option={option}
-                                                            optionIdx={optionIdx}
-                                                        />
-                                                    ))}
+                                {loading ? (
+                                    <div className="space-y-6">
+                                        {Array.from({ length: 3 }).map((_, idx) => (
+                                            <div key={idx} className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
+                                                <div className="mb-4 h-5 w-40 rounded-full bg-gray-200 animate-pulse" />
+                                                <div className="space-y-3">
+                                                    <div className="h-4 rounded-full bg-gray-200 animate-pulse" />
+                                                    <div className="h-4 rounded-full bg-gray-200 animate-pulse" />
                                                 </div>
-                                            </fieldset>
-                                        </div>
-                                    ))}
-                                </form>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <form className="space-y-10 divide-y divide-gray-200">
+                                        {filters.map((section, sectionIdx) => (
+                                            <Disclosure key={section.name} as="div" className={sectionIdx === 0 ? 'pb-10' : 'py-10'} defaultOpen>
+                                                {({ open }) => (
+                                                    <>
+                                                        <Disclosure.Button className="flex w-full items-center justify-between text-left text-sm font-medium text-gray-900">
+                                                            <span>{section.name}</span>
+                                                            <ChevronDownIcon
+                                                                className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'}`}
+                                                            />
+                                                        </Disclosure.Button>
+                                                        <Disclosure.Panel className="pt-6">
+                                                            <fieldset>
+                                                                <div className="space-y-3">
+                                                                    {section.options.map((option, optionIdx) => (
+                                                                        <FilterCheckbox
+                                                                            key={option.value}
+                                                                            section={section}
+                                                                            option={option}
+                                                                            optionIdx={optionIdx}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            </fieldset>
+                                                        </Disclosure.Panel>
+                                                    </>
+                                                )}
+                                            </Disclosure>
+                                        ))}
+                                    </form>
+                                )}
                             </div>
                         </aside>
 
                         <section aria-labelledby="product-heading" className="mt-6 lg:col-span-2 lg:mt-0 xl:col-span-3">
-                            <h2 id="product-heading" className="sr-only">
-                                Furniture
-                            </h2>
+                            <h2 id="product-heading" className="sr-only">Furniture</h2>
 
-                            {filteredFurnitures.length === 0 ? (
+                            {loading ? (
+                                <div className="space-y-8">
+                                    <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                                        <div className="mb-6 h-6 w-56 rounded-full bg-gray-200 animate-pulse" />
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                            {Array.from({ length: 6 }).map((_, idx) => (
+                                                <div key={idx} className="overflow-hidden rounded-3xl border border-gray-200 bg-gray-100 shadow-sm">
+                                                    <div className="h-48 bg-gray-200 animate-pulse" />
+                                                    <div className="p-4">
+                                                        <div className="mb-3 h-4 w-3/4 rounded-full bg-gray-200 animate-pulse" />
+                                                        <div className="mb-4 h-4 w-1/2 rounded-full bg-gray-200 animate-pulse" />
+                                                        <div className="h-10 rounded-full bg-gray-200 animate-pulse" />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : filteredFurnitures.length === 0 ? (
                                 <div className="rounded-3xl border border-dashed border-gray-300 bg-gray-50 px-6 py-16 text-center sm:px-10">
                                     <p className="text-lg font-semibold text-gray-900">No furniture matches your filters.</p>
                                     <p className="mt-3 text-sm leading-6 text-gray-600">
@@ -271,7 +345,7 @@ export default function ShopFurniturePageFilters({ furniture: initialFurniture }
                                         <ProductCard
                                             key={product.slug}
                                             product={product}
-                                            to={`/furniture/${product.slug}`}
+                                            to={`/products/${product.slug}`}
                                             showComfort={false}
                                             priceLabel="Call Store For Pricing"
                                         />
