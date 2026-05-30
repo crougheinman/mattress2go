@@ -90,14 +90,23 @@ export default function MattressShopFilters({ products: initialProducts, loading
                if (selectedValues.size === 0) return true
 
                if (sectionId === 'price') {
-                  const productPrice = Number(product.price)
-                  if (Number.isNaN(productPrice)) {
+                  const productPrices = product.sizes?.length
+                     ? product.sizes.map(s => s.price)
+                     : (Number.isNaN(Number(product.price)) ? [] : [Number(product.price)])
+                  if (productPrices.length === 0) {
                      return false
                   }
                   return Array.from(selectedValues).some(range => {
                      const [min, max] = range.split('-').map(n => n === '+' ? Infinity : Number(n))
-                     return productPrice >= min && productPrice < max
+                     return productPrices.some(price => price >= min && price < max)
                   })
+               }
+
+               if (sectionId === 'size') {
+                  const productSizes = product.sizes?.length ? product.sizes.map(s => s.size) : []
+                  // Flat-price / "call for price" products (no explicit sizes) are not filtered out.
+                  if (productSizes.length === 0) return true
+                  return productSizes.some(s => selectedValues.has(s))
                }
 
                const productValue = product[sectionId as keyof Product]

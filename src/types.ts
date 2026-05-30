@@ -40,6 +40,12 @@ export type Brand = {
 
 // Breakout into Mattress and Furniture are types of product, but only do that refactor when needed
 
+export type ProductSize = {
+  size: string;
+  price: number;
+  originalPrice?: number;
+};
+
 export type Product = {
   name: string;
   slug: string;
@@ -53,6 +59,10 @@ export type Product = {
   thumbnail_path?: string;
   gallery_images?: GalleryImage[];
   originalPrice?: number;
+  sizes?: ProductSize[];
+  priceLabel?: string;
+  priceFrom?: number;
+  priceTo?: number;
 };
 
 export type GalleryImage = {

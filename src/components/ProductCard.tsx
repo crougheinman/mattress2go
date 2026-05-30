@@ -9,6 +9,9 @@ type ProductCardItem = {
     comfortLevel?: string
     price?: string | number
     originalPrice?: number
+    priceLabel?: string
+    priceFrom?: number
+    priceTo?: number
 }
 
 interface ProductCardProps {
@@ -35,6 +38,19 @@ const ProductCard = ({
     const renderPrice = () => {
         if (priceLabel) {
             return priceLabel
+        }
+
+        // Prefer per-size pricing: show a single price or a "From $X" range.
+        if (product.priceFrom != null) {
+            const from = product.priceFrom
+            const to = product.priceTo ?? from
+            return from === to
+                ? `$${from.toLocaleString()}`
+                : `From $${from.toLocaleString()}`
+        }
+
+        if (product.priceLabel) {
+            return product.priceLabel
         }
 
         const priceValue = product.price

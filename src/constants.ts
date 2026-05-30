@@ -509,19 +509,28 @@ export const generateFiltersFromProducts = (products: Product[]) => {
 
   products.forEach((product) => {
     if (product.comfortLevel) uniqueValues.comfortLevel.add(product.comfortLevel);
-    if (product.size) uniqueValues.size.add(product.size);
     if (product.brand) uniqueValues.brand.add(product.brand);
 
-    const priceRangeKey = Object.keys(priceRanges).find((range) => {
-      const { min, max } = priceRanges[range as keyof typeof priceRanges];
-      return typeof product.price === 'number'
-        ? product.price >= min && product.price < max
-        : false;
-    });
+    // Sizes come from per-size variants; fall back to the legacy single size (excluding "ALL").
+    const productSizes = product.sizes?.length
+      ? product.sizes.map((s) => s.size)
+      : (product.size && product.size.toUpperCase() !== 'ALL' ? [product.size] : []);
+    productSizes.forEach((s) => uniqueValues.size.add(s));
 
-    if (priceRangeKey) {
-      usedPriceRanges.add(priceRangeKey);
-    }
+    // Prices come from per-size variants; fall back to a numeric legacy price.
+    const productPrices = product.sizes?.length
+      ? product.sizes.map((s) => s.price)
+      : (typeof product.price === 'number' ? [product.price] : []);
+
+    productPrices.forEach((price) => {
+      const rangeKey = Object.keys(priceRanges).find((range) => {
+        const { min, max } = priceRanges[range as keyof typeof priceRanges];
+        return price >= min && price < max;
+      });
+      if (rangeKey) {
+        usedPriceRanges.add(rangeKey);
+      }
+    });
   });
 
   const dynamicFilters = [

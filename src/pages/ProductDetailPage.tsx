@@ -38,6 +38,10 @@ interface ProductDetail {
     height?: string;
     weight?: string;
     features?: string[];
+    sizes?: { size: string; price: number; original_price: number | null }[];
+    price_from?: number | null;
+    price_to?: number | null;
+    price_label?: string | null;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
@@ -51,6 +55,7 @@ interface ProductDetail {
 const ProductDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const [product, setProduct] = useState<ProductDetail | null>(null);
+    const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
@@ -81,6 +86,7 @@ const ProductDetailPage: React.FC = () => {
                 const apiProduct = response.data?.data?.product;
                 if (apiProduct) {
                     setProduct(apiProduct);
+                    setSelectedSize(apiProduct.sizes?.[0]?.size ?? null);
                 } else {
                     setError(true);
                 }
@@ -143,6 +149,12 @@ const ProductDetailPage: React.FC = () => {
     const isFurniture = product.category === 'Furniture';
     const features = Array.isArray(product.features) ? product.features : [];
 
+    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+    const selectedVariant = sizes.find((s) => s.size === selectedSize) ?? sizes[0] ?? null;
+    const hasSizeSelector = sizes.length > 1 || (sizes.length === 1 && sizes[0].size.toUpperCase() !== 'ALL');
+    const priceLabel = product.price_label ?? null;
+    const displaySize = selectedVariant?.size ?? product.size;
+
     return (
         <Layout title={`${product.name}`}>
             <div className='bg-white'>
@@ -169,12 +181,39 @@ const ProductDetailPage: React.FC = () => {
                             <div className='mt-3'>
                                 <h2 className='sr-only'>Product information</h2>
                                 <p className='text-3xl tracking-tight text-gray-900'>
-                                    {product.original_price && typeof product.price === 'string' && (
-                                        <s className="mr-1">${product.original_price}</s>
-                                    )}{' '}
-                                    {product.price}
+                                    {selectedVariant ? (
+                                        <>
+                                            {selectedVariant.original_price ? (
+                                                <s className="mr-2 text-gray-400">${selectedVariant.original_price.toLocaleString()}</s>
+                                            ) : null}
+                                            ${selectedVariant.price.toLocaleString()}
+                                        </>
+                                    ) : (
+                                        priceLabel ?? 'Call Store For Pricing'
+                                    )}
                                 </p>
                             </div>
+
+                            {hasSizeSelector && (
+                                <div className='mt-6'>
+                                    <h3 className='text-sm font-medium text-gray-900'>Size</h3>
+                                    <div className='mt-3 flex flex-wrap gap-2'>
+                                        {sizes.map((s) => (
+                                            <button
+                                                key={s.size}
+                                                type='button'
+                                                onClick={() => setSelectedSize(s.size)}
+                                                className={`rounded-md border px-4 py-2 text-sm font-medium transition ${selectedVariant?.size === s.size
+                                                    ? 'border-copa-blue-600 bg-copa-blue-50 text-copa-blue-700'
+                                                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                                                    }`}
+                                            >
+                                                {s.size}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className='mt-6'>
                                 <h3 className='sr-only'>Description</h3>
@@ -218,12 +257,12 @@ const ProductDetailPage: React.FC = () => {
                                                         <span className='text-sm leading-6 text-gray-700'>Model: {product.name}</span>
                                                     </li>
                                                 )}
-                                                {product.size && (
+                                                {displaySize && displaySize.toUpperCase() !== 'ALL' && (
                                                     <li className='flex items-start gap-3'>
                                                         <span className='mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-copa-blue-50 text-copa-blue-600'>
                                                             <Icon icon='mdi:arrow-right' className='h-4 w-4' />
                                                         </span>
-                                                        <span className='text-sm leading-6 text-gray-700'>Size: {product.size}</span>
+                                                        <span className='text-sm leading-6 text-gray-700'>Size: {displaySize}</span>
                                                     </li>
                                                 )}
                                                 {isFurniture && product.sub_category && (

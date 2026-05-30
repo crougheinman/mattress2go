@@ -34,7 +34,7 @@ const ShopPage = () => {
 
                         return rawBrandString;
                     })(),
-                    price: product.price ?? '',
+                    price: product.price_from ?? product.price ?? '',
                     description: product.description ?? '',
                     thumbnail_path: product.thumbnail_path ?? '',
                     images: Array.isArray(product.gallery_images) && product.gallery_images.length
@@ -44,6 +44,16 @@ const ShopPage = () => {
                     color: product.color ?? '',
                     size: product.size ?? '',
                     originalPrice: product.original_price ?? product.originalPrice,
+                    sizes: Array.isArray(product.sizes)
+                        ? product.sizes.map((s: any) => ({
+                            size: s.size,
+                            price: Number(s.price),
+                            originalPrice: s.original_price != null ? Number(s.original_price) : undefined,
+                        }))
+                        : [],
+                    priceLabel: product.price_label ?? undefined,
+                    priceFrom: product.price_from != null ? Number(product.price_from) : undefined,
+                    priceTo: product.price_to != null ? Number(product.price_to) : undefined,
                 }));
 
                 setProducts(normalizedProducts);
