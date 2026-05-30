@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-Host: https://mattress2gooutlet.com
-Sitemap: https://mattress2gooutlet.com/sitemap-index.xml
+
+Sitemap: https://mattress2gooutlet.com/sitemap.xml
