@@ -1,10 +1,25 @@
 import { Link } from 'react-router-dom';
 import { FOOTER_LINKS, SOCIALS, SITE_NAME } from '../constants';
 import type { FooterLink, FooterSection } from '../types';
+import { useEffect, useState } from 'react';
+import apiClient from '../apiClient';
 import logo from '../assets/mattress2go-logo.png';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
+
+    // Brands shown in the footer come from the admin API; fall back to the
+    // static list (from constants) if the request fails.
+    const [apiBrands, setApiBrands] = useState<{ name: string; url?: string }[] | null>(null);
+
+    useEffect(() => {
+        let active = true;
+        apiClient
+            .get('/brands')
+            .then((res) => { if (active) setApiBrands(res.data?.data?.brands ?? null); })
+            .catch(() => { /* keep the static fallback */ });
+        return () => { active = false; };
+    }, []);
 
     const isFooterSection = (item: any): item is FooterSection => {
         return 'links' in item;
@@ -47,6 +62,20 @@ const Footer = () => {
             </li>
         );
     };
+
+    // Swap the static "Brands" group for the API-fetched brands when available.
+    const sections = FOOTER_LINKS.map((section) => {
+        if (section.label !== 'Shop') return section;
+        return {
+            ...section,
+            links: section.links.map((item) =>
+                isFooterSection(item) && item.label === 'Brands' && apiBrands && apiBrands.length
+                    ? { ...item, links: apiBrands.map((brand) => ({ label: brand.name, href: brand.url || '/shop' })) }
+                    : item,
+            ),
+        };
+    });
+
     return (
         <footer className="bg-olive-300" aria-labelledby="footer-heading">
             <h2 id="footer-heading" className="sr-only">Footer</h2>
@@ -70,7 +99,7 @@ const Footer = () => {
                         </div>
                     </div>
                     <div className="mt-16 grid grid-cols-1 gap-8 xl:col-span-2 xl:mt-0 md:grid-cols-3">
-                        {FOOTER_LINKS.map((section) => (
+                        {sections.map((section) => (
                             <div key={section.label} className="md:grid md:grid-cols-1 md:gap-8">
                                 {renderFooterItem(section)}
                             </div>
