@@ -1,6 +1,36 @@
+import { useEffect, useState } from 'react';
 import { SITE_NAME, BRANDS } from '../constants';
+import apiClient from '../apiClient';
+
+interface ApiBrand {
+    id: number;
+    name: string;
+    url?: string | null;
+    logo_path?: string | null;
+}
 
 const Brands = () => {
+    const [apiBrands, setApiBrands] = useState<ApiBrand[] | null>(null);
+    const [failed, setFailed] = useState<Record<string, boolean>>({});
+
+    useEffect(() => {
+        let active = true;
+        apiClient
+            .get('/brands')
+            .then((res) => { if (active) setApiBrands(res.data?.data?.brands ?? null); })
+            .catch(() => { /* keep the static fallback */ });
+        return () => { active = false; };
+    }, []);
+
+    // Prefer the admin-managed brands (with uploaded logos); fall back to the
+    // bundled static list when the API is unavailable or returns nothing.
+    const brands = apiBrands && apiBrands.length
+        ? apiBrands.map((b) => ({ name: b.name, src: b.logo_path ?? null }))
+        : BRANDS.map((b) => ({ name: b.name, src: `/brand-logos/${b.logo}` }));
+
+    // Only render brands that actually have a logo image (and haven't failed to load).
+    const visibleBrands = brands.filter((b) => b.src && !failed[b.name]);
+
     return (
         <div className='bg-gray-50 py-24 sm:py-32'>
             <div className='mx-auto max-w-7xl px-6 lg:px-8'>
@@ -26,12 +56,14 @@ const Brands = () => {
                         </div>
                     </div>
                     <div className='mx-auto grid w-full max-w-xl grid-cols-2 gap-8 sm:gap-10 lg:mx-0 lg:max-w-none lg:pl-8'>
-                        {BRANDS.map((brand) => (
+                        {visibleBrands.map((brand) => (
                             <div key={brand.name} className='flex h-24 w-full items-center justify-center rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 transition-shadow hover:shadow-md'>
                                 <img
                                     className='max-h-16 max-w-45 object-contain'
                                     alt={`${brand.name} Logo`}
-                                    src={`/brand-logos/${brand.logo}`}
+                                    src={brand.src as string}
+                                    loading='lazy'
+                                    onError={() => setFailed((f) => ({ ...f, [brand.name]: true }))}
                                 />
                             </div>
                         ))}

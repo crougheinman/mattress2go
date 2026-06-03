@@ -2,14 +2,15 @@ import Hero from '../components/Hero';
 import Features from '../components/Features';
 import Brands from '../components/Brands';
 import Layout from '../Layout';
+import Reveal from '../components/Reveal';
 
 const Home = () => {
     return (
         <Layout title="Home">
-            <Hero />
-            <Features />
+            <Reveal><Hero /></Reveal>
+            <Reveal><Features /></Reveal>
             {/* <About /> */}
-            <Brands />
+            <Reveal><Brands /></Reveal>
         </Layout>
     );
 };

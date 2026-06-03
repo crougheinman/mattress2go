@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import Layout from '../Layout';
+import Reveal from '../components/Reveal';
 import financingHeader from '../assets/financing-header.jpg';
 
 const benefits = [
@@ -72,17 +73,17 @@ const FinancingPage: React.FC = () => {
             </section>
 
             {/* Intro */}
-            <section className="mx-auto max-w-3xl px-4 pt-16 text-center">
+            <Reveal><section className="mx-auto max-w-3xl px-4 pt-16 text-center">
                 <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
                     Flexible Financing at Mattress2Go Outlet
                 </h2>
                 <p className="mt-4 text-lg leading-relaxed text-gray-600">
                     Our flexible financing plans are designed to accommodate various budgets and preferences, ensuring you can enjoy your new purchase without financial stress.
                 </p>
-            </section>
+            </section></Reveal>
 
             {/* Financing options */}
-            <section className="mx-auto max-w-5xl px-4 py-12">
+            <Reveal><section className="mx-auto max-w-5xl px-4 py-12">
                 <div className="grid gap-6 md:grid-cols-2">
                     {options.map((option) => (
                         <div
@@ -116,10 +117,10 @@ const FinancingPage: React.FC = () => {
                         </div>
                     ))}
                 </div>
-            </section>
+            </section></Reveal>
 
             {/* Closing CTA */}
-            <section className="mx-auto max-w-5xl px-4 pb-20">
+            <Reveal><section className="mx-auto max-w-5xl px-4 pb-20">
                 <div className="overflow-hidden rounded-3xl bg-linear-to-br from-copa-blue-700 to-copa-blue-900 px-6 py-12 text-center sm:px-12">
                     <Icon icon="mdi:bed-king-outline" className="mx-auto h-10 w-10 text-copa-blue-200" />
                     <h2 className="mt-4 text-2xl font-bold text-white sm:text-3xl">
@@ -145,7 +146,7 @@ const FinancingPage: React.FC = () => {
                         </Link>
                     </div>
                 </div>
-            </section>
+            </section></Reveal>
         </Layout>
     );
 };
