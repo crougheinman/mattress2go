@@ -7,7 +7,6 @@ import type {
   FooterSection,
   HeaderNavLinksType,
   Product,
-  PromoModal,
   Social,
 } from "./types.ts";
 
@@ -15,22 +14,6 @@ export const DESCRIPTION: string =
   "Home for name-brand mattresses, expert sleep advice, and fast local delivery.";
 
 export const SITE_NAME: string = "Mattress2Go Outlet";
-
-// Entry pop-up promo shown once per session on the home page. Edit copy/prices
-// here; toggle `enabled` to turn the whole pop-up off without touching the component.
-export const PROMO_MODAL: PromoModal = {
-  enabled: true,
-  heading: "Mattress To Go Only! 🛏️⚡",
-  subheading: "Unbeatable local clearance prices. Direct pickup discount!",
-  ctaLabel: "Shop Mattresses Now",
-  ctaUrl: "/shop",
-  tiers: [
-    { size: "Twin", price: 99 },
-    { size: "Full", price: 169 },
-    { size: "Queen", price: 299 },
-    { size: "King", price: 499 },
-  ],
-};
 
 export const HEADER_NAV_LINKS: HeaderNavLinksType[] = [
   {

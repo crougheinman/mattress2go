@@ -71,16 +71,3 @@ export type GalleryImage = {
   path: string;
 };
 
-export type PromoTier = {
-  size: string;
-  price: number;
-};
-
-export type PromoModal = {
-  enabled: boolean;
-  heading: string;
-  subheading: string;
-  ctaLabel: string;
-  ctaUrl: string;
-  tiers: PromoTier[];
-};

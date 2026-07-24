@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import EntryPromoModal from './components/EntryPromoModal';
+import FullScreenPromoOverlay from './components/FullScreenPromoOverlay';
 import Home from './pages/Home';
 import ContactPage from './pages/ContactPage';
 import ShopPage from './pages/ShopPage';
@@ -12,7 +12,7 @@ import NotFoundPage from './pages/NotFoundPage';
 function App() {
     return (
         <>
-        <EntryPromoModal />
+        <FullScreenPromoOverlay />
         <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<ShopPage />} />
